@@ -27,13 +27,13 @@ Rules:
 export const TOOL_DEFINITIONS: Anthropic.Tool[] = [
 	{
 		name: "search_google",
-		description: "Search Google for information. Returns the top search results with titles, URLs, and snippets.",
+		description: "Search the web for information. Returns search results with source URLs and relevant excerpts.",
 		input_schema: {
 			type: "object" as const,
 			properties: {
 				query: {
 					type: "string",
-					description: "The search query to send to Google",
+					description: "The web search query",
 				},
 			},
 			required: ["query"],

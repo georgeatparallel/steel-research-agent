@@ -1,5 +1,14 @@
 import { chromium, type Browser, type Page } from "playwright"
 import Steel from "steel-sdk"
+import { searchParallel } from "./parallel-search.js"
+
+export type SearchProvider = "duckduckgo" | "parallel"
+
+export function parseSearchProvider(value?: string): SearchProvider {
+	if (!value || value === "duckduckgo") return "duckduckgo"
+	if (value === "parallel") return "parallel"
+	throw new Error("SEARCH_PROVIDER must be duckduckgo or parallel")
+}
 
 export interface BrowserSession {
 	steel_client: Steel
@@ -78,6 +87,18 @@ export async function searchGoogle(
 	return filtered
 		.map((r, i) => `${i + 1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`)
 		.join("\n\n")
+}
+
+export async function searchWeb(
+	bs: BrowserSession,
+	query: string,
+	provider: SearchProvider = "duckduckgo",
+	signal?: AbortSignal,
+): Promise<string> {
+	if (provider === "parallel") {
+		return searchParallel(query, bs.session.id, { signal })
+	}
+	return searchGoogle(bs, query)
 }
 
 const BLOCKED_DOMAINS = ["google.com", "google.co", "googleapis.com", "gstatic.com"]

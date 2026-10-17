@@ -140,6 +140,23 @@ The app will be available at http://localhost:3001.
 
 Get your Steel API key at [app.steel.dev](https://app.steel.dev/settings/api-keys).
 
+### Optional Parallel search
+
+Set `SEARCH_PROVIDER=parallel` in `.env` and restart the server to discover sources
+with [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp).
+It provides free web search in Fast mode without a Parallel account or API key,
+subject to the anonymous service's rate limits. Searches send the query to
+`https://search.parallel.ai/mcp` over Streamable HTTP.
+
+Steel still reads the selected pages and provides the browser session, so both
+`STEEL_API_KEY` and `ANTHROPIC_API_KEY` remain required. Parallel searches happen
+outside the browser and do not appear in the live browser view. Search failures
+are reported through the existing error feed; they do not switch providers.
+
+Leave `SEARCH_PROVIDER` unset or set it to `duckduckgo` to keep the original
+browser-based search. Other values are rejected before research starts. This
+setting works with both local development and Docker's existing `.env` setup.
+
 ## Usage
 
 1. Open http://localhost:5173
@@ -150,6 +167,14 @@ Get your Steel API key at [app.steel.dev](https://app.steel.dev/settings/api-key
 6. Access past research from the history sidebar
 
 ## CLI Testing
+
+Run the provider and transport tests without API keys:
+
+```bash
+pnpm test
+```
+
+To exercise a complete research session with your Steel and Anthropic keys:
 
 ```bash
 # Start the server

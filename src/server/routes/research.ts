@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify"
 import { z } from "zod"
 import { runResearch } from "../agent/researcher.js"
+import { parseSearchProvider } from "../agent/tools.js"
 import type { ProgressEvent } from "../../shared/types.js"
 
 const schema_body = z.object({
@@ -23,6 +24,13 @@ export async function registerResearchRoute(app: FastifyInstance) {
 			return reply.status(500).send({ error: "Missing API keys" })
 		}
 
+		let search_provider
+		try {
+			search_provider = parseSearchProvider(process.env.SEARCH_PROVIDER)
+		} catch (error) {
+			return reply.status(500).send({ error: (error as Error).message })
+		}
+
 		reply.raw.writeHead(200, {
 			"Content-Type": "text/event-stream",
 			"Cache-Control": "no-cache",
@@ -34,7 +42,7 @@ export async function registerResearchRoute(app: FastifyInstance) {
 		}
 
 		try {
-			await runResearch(question, steel_api_key, anthropic_api_key, emit)
+			await runResearch(question, steel_api_key, anthropic_api_key, emit, search_provider)
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Unknown error"
 			emit({ type: "error", message })
